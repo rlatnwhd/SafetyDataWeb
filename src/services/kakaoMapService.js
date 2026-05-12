@@ -23,7 +23,35 @@ export function geocodeAddress(address) {
 }
 
 /**
- * 카카오 키워드 검색 (Places)
+ * 좌표 → 시군구 구역 명칭 (역지오코딩)
+ * 반환: { regionKey: "대구 중구", city1: "대구광역시", city2: "중구" } | null
+ */
+export function reverseGeocodeRegion(lat, lng) {
+  return new Promise((resolve) => {
+    if (!window.kakao?.maps?.services) { resolve(null); return; }
+    const geocoder = new window.kakao.maps.services.Geocoder();
+    geocoder.coord2RegionCode(lng, lat, (result, status) => {
+      if (status !== window.kakao.maps.services.Status.OK) { resolve(null); return; }
+      const region = result.find(r => r.region_type === 'B') || result[0];
+      if (!region) { resolve(null); return; }
+      const CITY_MAP = {
+        '서울특별시': '서울', '부산광역시': '부산', '대구광역시': '대구',
+        '인천광역시': '인천', '광주광역시': '광주', '대전광역시': '대전',
+        '울산광역시': '울산', '세종특별자치시': '세종시',
+        '경기도': '경기도', '강원도': '강원도', '충청북도': '충딉',
+        '충청남도': '충남', '전라북도': '전딉', '전라남도': '전남',
+        '경상북도': '경딉', '경상남도': '경남', '제주특별자치도': '제주',
+      };
+      const abbr = CITY_MAP[region.region_1depth_name] || region.region_1depth_name;
+      const city2 = region.region_2depth_name;
+      // 법정동코드 앞 8자리 = 읍면동코드 (시도2+시군구3+읍면동3)
+      const emdCd = region.code ? region.code.substring(0, 8) : null;
+      resolve({ regionKey: `${abbr} ${city2}`, city1: region.region_1depth_name, city2, emdCd });
+    });
+  });
+}
+
+/**
  * @param {string} keyword
  * @param {{ lat: number, lng: number }} center
  * @param {number} radius  단위: m

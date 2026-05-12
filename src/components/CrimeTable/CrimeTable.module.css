@@ -1,0 +1,103 @@
+/* CrimeTable.module.css */
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.noData {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  background: var(--color-badge-bg);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid #e5e7eb;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  min-width: 340px;
+}
+
+.table th {
+  background: #f9fafb;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.thCat { width: 30%; }
+.thSub { width: 46%; }
+.thCnt { width: 24%; text-align: right; }
+
+.even { background: #ffffff; }
+.odd  { background: #fafafa; }
+
+.catCell {
+  vertical-align: middle;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+}
+
+.catName {
+  display: block;
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 0.83rem;
+}
+
+.subtotal {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 0.2rem;
+}
+
+.subCell {
+  padding: 0.45rem 0.75rem;
+  color: var(--color-text);
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cntCell {
+  padding: 0.45rem 0.75rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  border-bottom: 1px solid #f0f0f0;
+  font-weight: 500;
+}
+
+.totalRow td {
+  background: #f1f5f9;
+  border-top: 2px solid #d1d5db;
+  padding: 0.6rem 0.75rem;
+  font-weight: 700;
+}
+
+.totalLabel {
+  color: var(--color-text);
+}
+
+.totalCount {
+  text-align: right;
+  color: var(--color-primary);
+  font-size: 0.95rem;
+}

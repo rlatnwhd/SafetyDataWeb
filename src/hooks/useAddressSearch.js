@@ -1,7 +1,7 @@
 // hooks/useAddressSearch.js — 주소 검색 + 점수 계산 상태 관리 (단일 책임: 검색 상태)
 import { useState, useCallback } from 'react';
-import { geocodeAddress, searchPlaces } from '../services/kakaoMapService';
-import { loadCctvNear } from '../services/csvService';
+import { geocodeAddress, searchPlaces, reverseGeocodeRegion } from '../services/kakaoMapService';
+import { loadCctvNear, getCrimesByRegion } from '../services/csvService';
 import { calcSafetyScore, calcRiskScore, calcConvenienceScore } from '../services/scoreService';
 
 const INITIAL_STATE = {
@@ -20,22 +20,26 @@ export function useAddressSearch() {
     try {
       const center = await geocodeAddress(address);
 
-      // CSV 데이터(CCTV) + 카카오 Places 병렬 로드
-      const [cctvList, policeList, entertainmentList, convenienceList, hospitalList] =
+      // 병렬 로드: CCTV CSV + 카카오 Places + 역지오코딩
+      const [cctvList, policeList, entertainmentList, convenienceList, hospitalList, regionInfo] =
         await Promise.all([
-          loadCctvNear(center, 0.5),          // CSV — CCTV (500m)
+          loadCctvNear(center, 0.5),
           searchPlaces('경찰서', center, 1000),
           searchPlaces('유흥업소', center, 500),
           searchPlaces('편의점', center, 500),
           searchPlaces('병원', center, 500),
+          reverseGeocodeRegion(center.lat, center.lng),
         ]);
+
+      // 시군구 확인 후 범죄통계 로드
+      const crimeStats = regionInfo ? await getCrimesByRegion(regionInfo.regionKey) : null;
+      const regionKey = regionInfo?.regionKey ?? null;
 
       const safetyScore = calcSafetyScore({
         cctv: cctvList.length,
         police: policeList.length,
-        streetlight: 0,
-      });
-      const riskScore = calcRiskScore({ entertainment: entertainmentList.length });
+      }, crimeStats);
+      const riskScore = calcRiskScore({ entertainment: entertainmentList.length }, crimeStats);
       const convenienceScore = calcConvenienceScore({
         convenience: convenienceList.length,
         hospital: hospitalList.length,
@@ -47,9 +51,11 @@ export function useAddressSearch() {
         result: {
           address,
           center,
+          regionKey,
           safetyScore,
           riskScore,
           convenienceScore,
+          crimeStats,
           markers: {
             cctv: cctvList,
             police: policeList,

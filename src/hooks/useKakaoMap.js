@@ -34,7 +34,6 @@ export function useKakaoMap(containerRef, center) {
       { key: 'entertainment', list: markers.entertainment, cat: MARKER_CATEGORIES.ENTERTAINMENT },
       { key: 'convenience',   list: markers.convenience,   cat: MARKER_CATEGORIES.CONVENIENCE },
       { key: 'hospital',      list: markers.hospital,      cat: MARKER_CATEGORIES.HOSPITAL },
-
     ];
 
     entries.forEach(({ key, list, cat }) => {

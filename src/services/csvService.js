@@ -74,11 +74,11 @@ function parseCctvCsv(text) {
 
 // 메모리 캐시 (앱 수명 동안 1회만 로드)
 let cctvCache = null;
+let crimeCache = null;
 
 /** 캐시 초기화 (개발 편의용) */
 export function clearCsvCache() {
-  cctvCache = null;
-}
+  cctvCache = null;  crimeCache = null;}
 
 /**
  * 특정 좌표 반경 내 CCTV 목록 반환
@@ -95,4 +95,55 @@ export async function loadCctvNear(center, radiusKm = 0.5) {
     (r) =>
       haversineKm(center.lat, center.lng, parseFloat(r.y), parseFloat(r.x)) <= radiusKm
   );
+}
+
+/**
+ * 범죄발생지역별통계.csv 로드 및 파싱
+ * 구조: 범죄대분류, 범죄중분류, [지역명...] (컬럼)
+ */
+async function loadCrimeData() {
+  if (crimeCache) return crimeCache;
+  const text = await fetchCsvEucKr('범죄발생지역별통계.csv');
+  if (!text) { crimeCache = { headers: [], rows: [] }; return crimeCache; }
+
+  const lines = text.trim().split(/\r?\n/);
+  const rawHeaders = lines[0].split(',');
+  // 헤더: 첫 2열(범죄대분류, 범죄중분류) 제외, 나머지 지역명
+  const headers = rawHeaders.slice(2).map(h => h.trim().replace(/\s+/g, ' '));
+
+  const rows = lines.slice(1).map(line => {
+    const cols = line.split(',');
+    return {
+      category: cols[0]?.trim(),
+      subCategory: cols[1]?.trim(),
+      values: cols.slice(2).map(v => parseInt(v.trim(), 10) || 0),
+    };
+  }).filter(r => r.category && r.subCategory);
+
+  crimeCache = { headers, rows };
+  console.log(`[csvService] 범죄통계 ${rows.length}행, ${headers.length}개 지역 로드`);
+  return crimeCache;
+}
+
+/**
+ * 특정 시군구 범죄 통계 반환
+ * @param {string} regionKey  예: "대구 중구"
+ * @returns {Promise<Array<{category, subCategory, count}> | null>}
+ */
+export async function getCrimesByRegion(regionKey) {
+  const data = await loadCrimeData();
+  if (!data.headers.length) return null;
+
+  const normalized = regionKey.replace(/\s+/g, '');
+  const colIdx = data.headers.findIndex(h => h.replace(/\s+/g, '') === normalized);
+  if (colIdx === -1) {
+    console.warn(`[csvService] 범죄통계에서 "${regionKey}" 지역을 찾을 수 없습니다.`);
+    return null;
+  }
+
+  return data.rows.map(row => ({
+    category: row.category,
+    subCategory: row.subCategory,
+    count: row.values[colIdx] || 0,
+  }));
 }

@@ -1,6 +1,7 @@
 // components/ResultSection/ResultSection.jsx — 분석 결과 표시 (단일 책임: 결과 UI)
 import ScoreBar from '../ScoreBar/ScoreBar';
 import KakaoMap from '../KakaoMap/KakaoMap';
+import CrimeTable from '../CrimeTable/CrimeTable';
 import styles from './ResultSection.module.css';
 
 export default function ResultSection({ result, error, onClose }) {
@@ -32,6 +33,7 @@ export default function ResultSection({ result, error, onClose }) {
           <ScoreBar label="편의도" score={result.convenienceScore} variant="convenience" />
         </div>
         <KakaoMap center={result.center} markers={result.markers} />
+        <CrimeTable crimeStats={result.crimeStats} regionKey={result.regionKey} />
       </div>
     </section>
   );
