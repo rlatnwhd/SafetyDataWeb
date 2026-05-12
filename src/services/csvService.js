@@ -161,3 +161,32 @@ export async function getAvgRegionCrimeTotal() {
   );
   return Math.round(totals.reduce((s, v) => s + v, 0) / totals.length);
 }
+
+/**
+ * 같은 시도(광역시·도) 내 구/군 평균 범죄 대분류별 건수 반환
+ * 예: regionKey = "부산 남구" → 부산 내 모든 구/군 평균
+ * @param {string} regionKey  예: "부산 남구"
+ * @returns {Promise<Record<string,number>|null>}
+ */
+export async function getAvgCrimeByCat(regionKey) {
+  const data = await loadCrimeData();
+  if (!data.headers.length || !data.rows.length) return null;
+
+  // 시도 추출: "부산 남구" → "부산"
+  const sido = regionKey.split(' ')[0];
+  // 같은 시도에 속하는 열 인덱스
+  const idxList = data.headers
+    .map((h, i) => (h.startsWith(sido + ' ') ? i : -1))
+    .filter(i => i !== -1);
+  if (!idxList.length) return null;
+
+  // 대분류별로 해당 시도 내 구/군 합산 후 평균
+  const catSums = {};
+  for (const row of data.rows) {
+    const catSum = idxList.reduce((s, i) => s + (row.values[i] || 0), 0);
+    catSums[row.category] = (catSums[row.category] ?? 0) + catSum;
+  }
+  return Object.fromEntries(
+    Object.entries(catSums).map(([cat, sum]) => [cat, Math.round(sum / idxList.length)])
+  );
+}

@@ -1,7 +1,7 @@
 // hooks/useAddressSearch.js — 주소 검색 + 점수 계산 상태 관리 (단일 책임: 검색 상태)
 import { useState, useCallback } from 'react';
 import { geocodeAddress, searchPlaces, reverseGeocodeRegion } from '../services/kakaoMapService';
-import { loadCctvNear, getCrimesByRegion, getAvgRegionCrimeTotal } from '../services/csvService';
+import { loadCctvNear, getCrimesByRegion, getAvgRegionCrimeTotal, getAvgCrimeByCat } from '../services/csvService';
 import { loadBanksNear } from '../services/bankService';
 import { loadStoresNear } from '../services/storeService';
 import { calcSafetyScore, calcInconvenienceScore, calcConvenienceScore } from '../services/scoreService';
@@ -40,13 +40,16 @@ export function useAddressSearch() {
           getAvgRegionCrimeTotal(),
         ]);
 
-      // 시군구 확인 후 범죄통계 로드
-      const crimeStats = regionInfo ? await getCrimesByRegion(regionInfo.regionKey) : null;
+      // 시군구 확인 후 범죄통계 + 시도 내 평균 로드
       const regionKey = regionInfo?.regionKey ?? null;
+      const [crimeStats, avgCrimeByCat] = await Promise.all([
+        regionInfo ? getCrimesByRegion(regionKey) : Promise.resolve(null),
+        regionKey ? getAvgCrimeByCat(regionKey) : Promise.resolve(null),
+      ]);
 
       // 현재 지역 범죄 합계 + 전국 평균으로 crimeData 구성
       const regionCrimeTotal = crimeStats ? crimeStats.reduce((s, r) => s + r.count, 0) : null;
-      const crimeData = { regionTotal: regionCrimeTotal, avgTotal: avgCrimeTotal };
+      const crimeData = { regionTotal: regionCrimeTotal, avgTotal: avgCrimeTotal, avgByCat: avgCrimeByCat };
 
       const safetyResult      = calcSafetyScore({ cctv: cctvList.length, police: policeList.length });
       const inconvResult      = calcInconvenienceScore({ entertainment: entertainmentList.length }, crimeData);

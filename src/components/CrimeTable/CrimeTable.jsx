@@ -2,8 +2,8 @@
 import { useState, Fragment } from 'react';
 import styles from './CrimeTable.module.css';
 
-// 자취 관련 주요 범죄 카테고리
-const KEY_CATS = ['강력범죄', '절도범죄', '폭력범죄', '성범죄'];
+// 자취 관련 주요 범죄 카테고리 (성범죄는 강력범죄에 포함)
+const KEY_CATS = ['강력범죄', '절도범죄', '폭력범죄'];
 
 const CAT_COLOR = {
   '강력범죄': '#ef4444',
@@ -25,12 +25,13 @@ function levelLabel(regionTotal, avgTotal) {
   return              { text: '매우 높음', cls: 'levelHigh' };
 }
 
-function catLevel(catTotal, allCatTotals) {
-  const values = Object.values(allCatTotals).filter(v => v > 0);
-  if (!values.length) return '알 수 없음';
-  const avg = values.reduce((s, v) => s + v, 0) / values.length;
-  if (catTotal < avg * 0.6) return '낮음';
-  if (catTotal < avg * 1.4) return '보통';
+// 전국 해당 대분류 평균(avgByCat)과 비교
+function catLevel(cat, catTotal, avgByCat) {
+  const avg = avgByCat?.[cat];
+  if (avg == null || avg === 0) return '알 수 없음';
+  const ratio = catTotal / avg;
+  if (ratio < 0.7)  return '낮음';
+  if (ratio < 1.3)  return '보통';
   return '높음';
 }
 
@@ -59,12 +60,12 @@ export default function CrimeTable({ crimeStats, regionKey, crimeData }) {
   );
   const total = Object.values(catTotals).reduce((s, v) => s + v, 0);
 
-  // 요약용 주요 범죄 — KEY_CATS 4개끼리만 상대 비교
-  const keyTotals = Object.fromEntries(KEY_CATS.map(k => [k, catTotals[k] ?? 0]));
+  // 요약용 주요 범죄 — 전국 대분류별 평균과 비교
+  const avgByCat = crimeData?.avgByCat;
   const keySummary = KEY_CATS.map(cat => ({
     cat,
     total: catTotals[cat] ?? 0,
-    level: catLevel(catTotals[cat] ?? 0, keyTotals),
+    level: catLevel(cat, catTotals[cat] ?? 0, avgByCat),
   }));
 
   // 주의 요소 (평균 이상인 주요 범죄)
@@ -86,7 +87,7 @@ export default function CrimeTable({ crimeStats, regionKey, crimeData }) {
       {/* ── 요약 카드 ── */}
       <div className={styles.summaryCard}>
         <div className={styles.summaryRow}>
-          <span className={styles.summaryKey}>범죄 발생 수준</span>
+          <span className={styles.summaryKey}>범죄 발생 수준 <span className={styles.basis}>(전국 평균 대비)</span></span>
           <span className={`${styles.levelBadge} ${styles[overallLevel.cls]}`}>{overallLevel.text}</span>
         </div>
         <div className={styles.summaryRow}>
@@ -96,6 +97,7 @@ export default function CrimeTable({ crimeStats, regionKey, crimeData }) {
 
         {/* 주요 범죄 항목 */}
         <div className={styles.keySection}>
+          <span className={styles.keySectionLabel}>주요 범죄 항목 <span className={styles.basis}>(시·도 내 평균 대비)</span></span>
           {keySummary.map(({ cat, total: t, level }) => (
             <div key={cat} className={styles.keyCatRow}>
               <span className={styles.keyCatName} style={{ color: CAT_COLOR[cat] ?? '#6b7280' }}>{cat}</span>
