@@ -19,7 +19,7 @@ export const MARKER_CATEGORIES = {
 // count = avg → 50점, count = 2×avg → 75점, count = 4×avg → ~95점 (100점 불가)
 export const SCORE_AVERAGES = {
   cctv: 15,          // CCTV 평균 약 15개
-  police: 1,         // 경찰서 평균 약 1개
+  police: 2,          // 경찰서·파출소·지구대 합산 평균 약 2개
   entertainment: 3,  // 유흥업소 평균 약 3개
   convenience: 6,    // 편의점 평균 약 6개
   hospital: 4,       // 병원 평균 약 4개

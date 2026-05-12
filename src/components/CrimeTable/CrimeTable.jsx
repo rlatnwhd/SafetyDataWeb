@@ -59,11 +59,12 @@ export default function CrimeTable({ crimeStats, regionKey, crimeData }) {
   );
   const total = Object.values(catTotals).reduce((s, v) => s + v, 0);
 
-  // 요약용 주요 범죄
+  // 요약용 주요 범죄 — KEY_CATS 4개끼리만 상대 비교
+  const keyTotals = Object.fromEntries(KEY_CATS.map(k => [k, catTotals[k] ?? 0]));
   const keySummary = KEY_CATS.map(cat => ({
     cat,
     total: catTotals[cat] ?? 0,
-    level: catLevel(catTotals[cat] ?? 0, catTotals),
+    level: catLevel(catTotals[cat] ?? 0, keyTotals),
   }));
 
   // 주의 요소 (평균 이상인 주요 범죄)

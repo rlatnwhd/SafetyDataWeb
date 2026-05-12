@@ -29,7 +29,7 @@ export function useAddressSearch() {
         await Promise.all([
           loadCctvNear(center, RADIUS_M / 1000),
           searchPlaces('경찰서', center, RADIUS_M).then(list =>
-            list.filter(p => p.place_name.includes('경찰서') || p.place_name.includes('파출소') || p.place_name.includes('지구대'))
+            list.filter(p => /경찰서$|파출소$|지구대$/.test(p.place_name.trim()))
           ),
           searchPlaces('유흥업소', center, RADIUS_M),
           searchPlaces('편의점', center, RADIUS_M),
