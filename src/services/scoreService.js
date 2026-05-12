@@ -35,15 +35,13 @@ export function calcRiskScore(counts) {
 
 /**
  * 편의도 점수 계산
- * 버스정류장은 CSV 실데이터(300m 반경) 기준 최대 8개 기준
- * @param {{ convenience: number, hospital: number, busStop: number }} counts
+ * @param {{ convenience: number, hospital: number }} counts
  */
 export function calcConvenienceScore(counts) {
   const w = SCORE_WEIGHTS.convenience;
   const total =
     (countToScore(counts.convenience, 5) * w.convenience +
-      countToScore(counts.hospital, 3) * w.hospital +
-      countToScore(counts.busStop, 8) * w.busStop) /
+      countToScore(counts.hospital, 3) * w.hospital) /
     100;
   return Math.round(total);
 }

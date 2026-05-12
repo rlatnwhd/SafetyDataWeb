@@ -1,7 +1,7 @@
 // hooks/useAddressSearch.js — 주소 검색 + 점수 계산 상태 관리 (단일 책임: 검색 상태)
 import { useState, useCallback } from 'react';
 import { geocodeAddress, searchPlaces } from '../services/kakaoMapService';
-import { loadBusStopsNear, loadCctvNear } from '../services/csvService';
+import { loadCctvNear } from '../services/csvService';
 import { calcSafetyScore, calcRiskScore, calcConvenienceScore } from '../services/scoreService';
 
 const INITIAL_STATE = {
@@ -20,11 +20,10 @@ export function useAddressSearch() {
     try {
       const center = await geocodeAddress(address);
 
-      // CSV 데이터 (CCTV, 버스정류장) + 카카오 Places 병렬 로드
-      const [cctvList, busStopList, policeList, entertainmentList, convenienceList, hospitalList] =
+      // CSV 데이터(CCTV) + 카카오 Places 병렬 로드
+      const [cctvList, policeList, entertainmentList, convenienceList, hospitalList] =
         await Promise.all([
-          loadCctvNear(center, 0.5),                    // CSV — CCTV (500m)
-          loadBusStopsNear(center, 0.3),                // CSV — 버스정류장 (300m)
+          loadCctvNear(center, 0.5),          // CSV — CCTV (500m)
           searchPlaces('경찰서', center, 1000),
           searchPlaces('유흥업소', center, 500),
           searchPlaces('편의점', center, 500),
@@ -40,7 +39,6 @@ export function useAddressSearch() {
       const convenienceScore = calcConvenienceScore({
         convenience: convenienceList.length,
         hospital: hospitalList.length,
-        busStop: busStopList.length,
       });
 
       setState({
@@ -58,7 +56,6 @@ export function useAddressSearch() {
             entertainment: entertainmentList,
             convenience: convenienceList,
             hospital: hospitalList,
-            busStop: busStopList,
           },
         },
       });

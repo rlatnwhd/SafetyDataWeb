@@ -25,27 +25,6 @@ async function fetchCsvEucKr(filename) {
 }
 
 /**
- * 버스정류장정보.csv 파싱
- * 컬럼 구조: 정류장노드ID, 정류장명, 경도, 위도, 운수업체코드, 운수업체명
- */
-function parseBusStopCsv(text) {
-  return text
-    .trim()
-    .split(/\r?\n/)
-    .slice(1) // 헤더 제외
-    .map((line) => {
-      const cols = line.split(',');
-      const id = cols[0]?.trim();
-      const name = cols[1]?.trim();
-      const lng = parseFloat(cols[2]);
-      const lat = parseFloat(cols[3]);
-      if (!id || isNaN(lat) || isNaN(lng)) return null;
-      return { id, place_name: name || '버스정류장', x: String(lng), y: String(lat) };
-    })
-    .filter(Boolean);
-}
-
-/**
  * CCTV정보.csv 파싱 — 헤더에서 위도/경도 컬럼 자동 탐지
  * 예상 컬럼 예시: 연번, 소재지도로명주소, 위도, 경도, 카메라대수, ...
  */
@@ -56,10 +35,11 @@ function parseCctvCsv(text) {
   const headers = lines[0].split(',').map((h) => h.trim());
 
   const latIdx = headers.findIndex(
-    (h) => h === '위도' || h.toLowerCase() === 'lat' || h.toLowerCase() === 'latitude'
+    (h) => h === 'WGS84위도' || h === '위도' || h.toLowerCase() === 'lat' || h.toLowerCase() === 'latitude'
   );
   const lngIdx = headers.findIndex(
     (h) =>
+      h === 'WGS84경도' ||
       h === '경도' ||
       h.toLowerCase() === 'lng' ||
       h.toLowerCase() === 'lon' ||
@@ -93,30 +73,11 @@ function parseCctvCsv(text) {
 }
 
 // 메모리 캐시 (앱 수명 동안 1회만 로드)
-let busStopCache = null;
 let cctvCache = null;
 
 /** 캐시 초기화 (개발 편의용) */
 export function clearCsvCache() {
-  busStopCache = null;
   cctvCache = null;
-}
-
-/**
- * 특정 좌표 반경 내 버스정류장 목록 반환
- * @param {{ lat: number, lng: number }} center
- * @param {number} radiusKm  기본 0.5km (500m)
- */
-export async function loadBusStopsNear(center, radiusKm = 0.5) {
-  if (!busStopCache) {
-    const text = await fetchCsvEucKr('버스정류장정보.csv');
-    busStopCache = text ? parseBusStopCsv(text) : [];
-    console.log(`[csvService] 버스정류장 ${busStopCache.length}건 로드`);
-  }
-  return busStopCache.filter(
-    (r) =>
-      haversineKm(center.lat, center.lng, parseFloat(r.y), parseFloat(r.x)) <= radiusKm
-  );
 }
 
 /**

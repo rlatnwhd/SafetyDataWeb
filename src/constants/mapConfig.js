@@ -12,11 +12,10 @@ export const MARKER_CATEGORIES = {
   ENTERTAINMENT: { label: '유흥업소', color: '#ef4444', emoji: '🍺' },
   CONVENIENCE: { label: '편의점', color: '#22c55e', emoji: '🏪' },
   HOSPITAL: { label: '병원', color: '#f97316', emoji: '🏥' },
-  BUS_STOP: { label: '버스정류장', color: '#14b8a6', emoji: '🚌' },
 };
 
 export const SCORE_WEIGHTS = {
   safety: { cctv: 30, police: 40, streetlight: 30 },
   risk: { entertainment: 100 },
-  convenience: { convenience: 30, hospital: 40, busStop: 30 },
+  convenience: { convenience: 50, hospital: 50 },
 };

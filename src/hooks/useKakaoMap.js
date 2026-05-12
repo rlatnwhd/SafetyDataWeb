@@ -34,13 +34,13 @@ export function useKakaoMap(containerRef, center) {
       { key: 'entertainment', list: markers.entertainment, cat: MARKER_CATEGORIES.ENTERTAINMENT },
       { key: 'convenience',   list: markers.convenience,   cat: MARKER_CATEGORIES.CONVENIENCE },
       { key: 'hospital',      list: markers.hospital,      cat: MARKER_CATEGORIES.HOSPITAL },
-      { key: 'busStop',       list: markers.busStop,       cat: MARKER_CATEGORIES.BUS_STOP },
+
     ];
 
     entries.forEach(({ key, list, cat }) => {
       const overlays = list.map((place) => {
         const position = new window.kakao.maps.LatLng(place.y, place.x);
-        const content = `<div style="font-size:20px;line-height:1">${cat.emoji}</div>`;
+        const content = `<div style="font-size:18px;line-height:1;background:#fff;border:2px solid ${cat.color};border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);cursor:default;">${cat.emoji}</div>`;
         const overlay = new window.kakao.maps.CustomOverlay({ position, content, yAnchor: 1 });
         overlay.setMap(mapRef.current);
         return overlay;
