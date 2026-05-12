@@ -19,13 +19,14 @@ export const SCORE_WEIGHTS = {
   convenience: { convenience: 50, hospital: 50 },
 };
 
-// 각 시설의 "만점" 기준 개수 및 범죄 기준치
+// 각 시설의 "포화점" 기준 개수 및 범죄 기준치
+// 포화점 = 이 수치에 도달해야 상한선(80점)에 수렴 (100점 불가)
 export const SCORE_MAXCOUNTS = {
-  cctv: 15,          // CCTV 15개 이상 = 100점
-  police: 2,         // 경찰서 2개 이상 = 100점
-  entertainment: 5,  // 유흥업소 5개 이상 = 100점
-  convenience: 5,    // 편의점 5개 이상 = 100점
-  hospital: 3,       // 병원 3개 이상 = 100점
-  totalCrime: 300,   // 강력범죄 합계 300건 = 안전점수 0점
-  seriousCrime: 50,  // 살인·강도·강간·방화 50건 = 위험점수 100점
+  cctv: 30,           // CCTV 30개 이상 → 포화
+  police: 5,          // 경찰서 5개 이상 → 포화
+  entertainment: 15,  // 유흥업소 15개 이상 → 위험도 포화
+  convenience: 15,    // 편의점 15개 이상 → 포화
+  hospital: 10,       // 병원 10개 이상 → 포화
+  totalCrime: 500,    // 강력범죄 500건 = 안전점수 최저
+  seriousCrime: 80,   // 살인·강도·강간·방화 80건 = 위험점수 최고
 };
