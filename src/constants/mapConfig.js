@@ -12,7 +12,6 @@ export const MARKER_CATEGORIES = {
   CONVENIENCE: { label: '편의점', color: '#22c55e', emoji: '🏪' },
   HOSPITAL: { label: '병원', color: '#f97316', emoji: '🏥' },
   BANK: { label: '은행', color: '#0ea5e9', emoji: '🏦' },
-  STORE: { label: '대형점포', color: '#a855f7', emoji: '🛒' },
 };
 
 export const SCORE_WEIGHTS = {

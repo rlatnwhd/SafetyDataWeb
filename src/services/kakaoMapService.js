@@ -16,7 +16,15 @@ export function geocodeAddress(address) {
       if (status === window.kakao.maps.services.Status.OK && result.length > 0) {
         resolve({ lat: parseFloat(result[0].y), lng: parseFloat(result[0].x) });
       } else {
-        reject(new Error('주소를 찾을 수 없습니다. 다시 확인해주세요.'));
+        // 주소 검색 실패 → 장소명 키워드 검색으로 폴백
+        const ps = new window.kakao.maps.services.Places();
+        ps.keywordSearch(address, (plResult, plStatus) => {
+          if (plStatus === window.kakao.maps.services.Status.OK && plResult.length > 0) {
+            resolve({ lat: parseFloat(plResult[0].y), lng: parseFloat(plResult[0].x) });
+          } else {
+            reject(new Error('주소를 찾을 수 없습니다. 다시 확인해주세요.'));
+          }
+        });
       }
     });
   });

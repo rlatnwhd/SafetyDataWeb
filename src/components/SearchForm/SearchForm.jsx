@@ -44,7 +44,8 @@ export default function SearchForm({ onSearch, loading, disabled }) {
     setValue(addr);
     setSuggestions([]);
     setOpen(false);
-    onSearch(addr);
+    // 카카오 Places 결과에는 이미 좌표(x=경도, y=위도)가 있음 → geocode 불필요
+    onSearch(addr, { lat: parseFloat(place.y), lng: parseFloat(place.x) });
   };
 
   const handleSubmit = (e) => {

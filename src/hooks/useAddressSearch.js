@@ -3,7 +3,6 @@ import { useState, useCallback } from 'react';
 import { geocodeAddress, searchPlaces, reverseGeocodeRegion } from '../services/kakaoMapService';
 import { loadCctvNear, getCrimesByRegion } from '../services/csvService';
 import { loadBanksNear } from '../services/bankService';
-import { loadStoresNear } from '../services/storeService';
 import { calcSafetyScore, calcRiskScore, calcConvenienceScore } from '../services/scoreService';
 
 const INITIAL_STATE = {
@@ -15,23 +14,23 @@ const INITIAL_STATE = {
 export function useAddressSearch() {
   const [state, setState] = useState(INITIAL_STATE);
 
-  const search = useCallback(async (address) => {
+  const search = useCallback(async (address, preResolvedCenter = null) => {
     if (!address.trim()) return;
     setState({ loading: true, error: null, result: null });
 
     try {
-      const center = await geocodeAddress(address);
+      // 자동완성 클릭 시 이미 좌표가 있으면 geocode 건너뜀
+      const center = preResolvedCenter ?? (await geocodeAddress(address));
 
       // 병렬 로드: CCTV CSV + 카카오 Places + 역지오코딩 + 은행
-      const [cctvList, policeList, entertainmentList, convenienceList, hospitalList, bankList, storeList, regionInfo] =
+      const [cctvList, policeList, entertainmentList, convenienceList, hospitalList, bankList, regionInfo] =
         await Promise.all([
           loadCctvNear(center, 0.5),
           searchPlaces('경찰서', center, 1000),
           searchPlaces('유흥업소', center, 500),
           searchPlaces('편의점', center, 500),
           searchPlaces('병원', center, 500),
-          loadBanksNear(center, 0.5),
-          loadStoresNear(center, 0.5),
+          loadBanksNear(center, 0.8),
           reverseGeocodeRegion(center.lat, center.lng),
         ]);
 
@@ -67,7 +66,6 @@ export function useAddressSearch() {
             convenience: convenienceList,
             hospital: hospitalList,
             bank: bankList,
-            store: storeList,
           },
         },
       });
