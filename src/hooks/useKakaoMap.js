@@ -2,20 +2,20 @@
 import { useEffect, useRef } from 'react';
 import { MARKER_CATEGORIES, MAP_DEFAULT } from '../constants/mapConfig';
 
-export function useKakaoMap(container, center) {
+export function useKakaoMap(containerRef, center) {
   const mapRef = useRef(null);
   const markersRef = useRef([]);
 
   // 지도 초기화
   useEffect(() => {
-    if (!container || !center || !window.kakao?.maps) return;
+    if (!containerRef.current || !center || !window.kakao?.maps) return;
 
     const options = {
       center: new window.kakao.maps.LatLng(center.lat, center.lng),
       level: MAP_DEFAULT.level,
     };
-    mapRef.current = new window.kakao.maps.Map(container, options);
-  }, [container, center]);
+    mapRef.current = new window.kakao.maps.Map(containerRef.current, options);
+  }, [containerRef, center]);
 
   // 마커 그리기
   const drawMarkers = (markers) => {

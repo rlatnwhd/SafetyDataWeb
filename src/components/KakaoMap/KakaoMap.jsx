@@ -5,7 +5,7 @@ import styles from './KakaoMap.module.css';
 
 export default function KakaoMap({ center, markers }) {
   const containerRef = useRef(null);
-  const { drawMarkers } = useKakaoMap(containerRef.current, center);
+  const { drawMarkers } = useKakaoMap(containerRef, center);
 
   useEffect(() => {
     if (markers) drawMarkers(markers);
