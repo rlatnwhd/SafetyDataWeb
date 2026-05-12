@@ -1,10 +1,15 @@
 /* SearchForm.module.css */
+.wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
 .form {
   display: flex;
   gap: 0.5rem;
   width: 100%;
-  max-width: 560px;
-  margin: 0 auto;
 }
 
 .input {
@@ -47,6 +52,45 @@
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* 자동완성 드롭다운 */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  list-style: none;
+  z-index: 200;
+  overflow: hidden;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.item:hover {
+  background: #f0f7ff;
+}
+
+.itemName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.itemAddr {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
 }
 
 @media (max-width: 480px) {

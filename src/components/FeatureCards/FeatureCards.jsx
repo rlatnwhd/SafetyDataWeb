@@ -25,8 +25,10 @@ export default function FeatureCards() {
       {FEATURES.map((f) => (
         <article key={f.title} className={styles.card}>
           <span className={styles.icon}>{f.icon}</span>
-          <h3 className={styles.title}>{f.title}</h3>
-          <p className={styles.desc}>{f.desc}</p>
+          <div className={styles.text}>
+            <h3 className={styles.title}>{f.title}</h3>
+            <p className={styles.desc}>{f.desc}</p>
+          </div>
         </article>
       ))}
     </div>

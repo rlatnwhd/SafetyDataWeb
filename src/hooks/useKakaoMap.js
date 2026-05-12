@@ -1,10 +1,12 @@
 // hooks/useKakaoMap.js — 카카오맵 DOM 인스턴스 관리 (단일 책임: 지도 렌더링)
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { MARKER_CATEGORIES, MAP_DEFAULT } from '../constants/mapConfig';
 
 export function useKakaoMap(containerRef, center) {
   const mapRef = useRef(null);
-  const markersRef = useRef([]);
+  // 카테고리 키 → 오버레이 배열
+  const categoryOverlaysRef = useRef({});
+  const centerMarkerRef = useRef(null);
 
   // 지도 초기화
   useEffect(() => {
@@ -17,44 +19,54 @@ export function useKakaoMap(containerRef, center) {
     mapRef.current = new window.kakao.maps.Map(containerRef.current, options);
   }, [containerRef, center]);
 
-  // 마커 그리기
-  const drawMarkers = (markers) => {
-    // 기존 마커 제거
-    markersRef.current.forEach((m) => m.setMap(null));
-    markersRef.current = [];
+  // 마커 그리기 (카테고리별 분리 보관)
+  const drawMarkers = useCallback((markers) => {
+    // 기존 오버레이 전체 제거
+    Object.values(categoryOverlaysRef.current).flat().forEach((o) => o.setMap(null));
+    categoryOverlaysRef.current = {};
+    if (centerMarkerRef.current) { centerMarkerRef.current.setMap(null); centerMarkerRef.current = null; }
 
     if (!mapRef.current || !window.kakao?.maps) return;
 
     const entries = [
-      { list: markers.cctv, cat: MARKER_CATEGORIES.CCTV },
-      { list: markers.police, cat: MARKER_CATEGORIES.POLICE },
-      { list: markers.entertainment, cat: MARKER_CATEGORIES.ENTERTAINMENT },
-      { list: markers.convenience, cat: MARKER_CATEGORIES.CONVENIENCE },
-      { list: markers.hospital, cat: MARKER_CATEGORIES.HOSPITAL },
-      { list: markers.busStop, cat: MARKER_CATEGORIES.BUS_STOP },
+      { key: 'cctv',          list: markers.cctv,          cat: MARKER_CATEGORIES.CCTV },
+      { key: 'police',        list: markers.police,        cat: MARKER_CATEGORIES.POLICE },
+      { key: 'entertainment', list: markers.entertainment, cat: MARKER_CATEGORIES.ENTERTAINMENT },
+      { key: 'convenience',   list: markers.convenience,   cat: MARKER_CATEGORIES.CONVENIENCE },
+      { key: 'hospital',      list: markers.hospital,      cat: MARKER_CATEGORIES.HOSPITAL },
+      { key: 'busStop',       list: markers.busStop,       cat: MARKER_CATEGORIES.BUS_STOP },
     ];
 
-    entries.forEach(({ list, cat }) => {
-      list.forEach((place) => {
+    entries.forEach(({ key, list, cat }) => {
+      const overlays = list.map((place) => {
         const position = new window.kakao.maps.LatLng(place.y, place.x);
         const content = `<div style="font-size:20px;line-height:1">${cat.emoji}</div>`;
-        const overlay = new window.kakao.maps.CustomOverlay({
-          position,
-          content,
-          yAnchor: 1,
-        });
+        const overlay = new window.kakao.maps.CustomOverlay({ position, content, yAnchor: 1 });
         overlay.setMap(mapRef.current);
-        markersRef.current.push(overlay);
+        return overlay;
       });
+      categoryOverlaysRef.current[key] = overlays;
     });
 
     // 중심 마커
-    const centerMarker = new window.kakao.maps.Marker({
+    centerMarkerRef.current = new window.kakao.maps.Marker({
       position: new window.kakao.maps.LatLng(center.lat, center.lng),
       map: mapRef.current,
     });
-    markersRef.current.push(centerMarker);
-  };
+  }, [center]);
 
-  return { drawMarkers };
+  // 카테고리 토글
+  const toggleCategory = useCallback((key, visible) => {
+    const overlays = categoryOverlaysRef.current[key] || [];
+    overlays.forEach((o) => o.setMap(visible ? mapRef.current : null));
+  }, []);
+
+  // 중심 복귀
+  const resetCenter = useCallback(() => {
+    if (!mapRef.current || !center) return;
+    mapRef.current.setCenter(new window.kakao.maps.LatLng(center.lat, center.lng));
+    mapRef.current.setLevel(MAP_DEFAULT.level);
+  }, [center]);
+
+  return { drawMarkers, toggleCategory, resetCenter };
 }

@@ -1,42 +1,65 @@
-/* ScoreBar.module.css */
+/* ScoreBar.module.css — 원형 게이지 */
 .item {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-}
-
-.top {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.5rem;
+  position: relative;
 }
 
-.label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-}
-
-.value {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--color-text);
+.svg {
+  width: 88px;
+  height: 88px;
+  transform: rotate(-90deg);
 }
 
 .track {
-  width: 100%;
-  height: 8px;
-  background: var(--color-border);
-  border-radius: var(--radius-full);
-  overflow: hidden;
+  fill: none;
+  stroke: #e5e7eb;
+  stroke-width: 8;
 }
 
 .fill {
-  height: 100%;
-  border-radius: var(--radius-full);
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.fill--safety     { background: var(--color-success); }
-.fill--risk       { background: var(--color-danger); }
-.fill--convenience { background: var(--color-info); }
+.svg--safety .fill   { stroke: #22c55e; }
+.svg--risk .fill     { stroke: #ef4444; }
+.svg--convenience .fill { stroke: #6366f1; }
+
+/* 가운데 숫자 (svg 위에 절대 배치) */
+.center {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 88px;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  gap: 1px;
+}
+
+.value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.unit {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
