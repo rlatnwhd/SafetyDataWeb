@@ -1,0 +1,60 @@
+// hooks/useKakaoMap.js — 카카오맵 DOM 인스턴스 관리 (단일 책임: 지도 렌더링)
+import { useEffect, useRef } from 'react';
+import { MARKER_CATEGORIES, MAP_DEFAULT } from '../constants/mapConfig';
+
+export function useKakaoMap(container, center) {
+  const mapRef = useRef(null);
+  const markersRef = useRef([]);
+
+  // 지도 초기화
+  useEffect(() => {
+    if (!container || !center || !window.kakao?.maps) return;
+
+    const options = {
+      center: new window.kakao.maps.LatLng(center.lat, center.lng),
+      level: MAP_DEFAULT.level,
+    };
+    mapRef.current = new window.kakao.maps.Map(container, options);
+  }, [container, center]);
+
+  // 마커 그리기
+  const drawMarkers = (markers) => {
+    // 기존 마커 제거
+    markersRef.current.forEach((m) => m.setMap(null));
+    markersRef.current = [];
+
+    if (!mapRef.current || !window.kakao?.maps) return;
+
+    const entries = [
+      { list: markers.cctv, cat: MARKER_CATEGORIES.CCTV },
+      { list: markers.police, cat: MARKER_CATEGORIES.POLICE },
+      { list: markers.entertainment, cat: MARKER_CATEGORIES.ENTERTAINMENT },
+      { list: markers.convenience, cat: MARKER_CATEGORIES.CONVENIENCE },
+      { list: markers.hospital, cat: MARKER_CATEGORIES.HOSPITAL },
+      { list: markers.busStop, cat: MARKER_CATEGORIES.BUS_STOP },
+    ];
+
+    entries.forEach(({ list, cat }) => {
+      list.forEach((place) => {
+        const position = new window.kakao.maps.LatLng(place.y, place.x);
+        const content = `<div style="font-size:20px;line-height:1">${cat.emoji}</div>`;
+        const overlay = new window.kakao.maps.CustomOverlay({
+          position,
+          content,
+          yAnchor: 1,
+        });
+        overlay.setMap(mapRef.current);
+        markersRef.current.push(overlay);
+      });
+    });
+
+    // 중심 마커
+    const centerMarker = new window.kakao.maps.Marker({
+      position: new window.kakao.maps.LatLng(center.lat, center.lng),
+      map: mapRef.current,
+    });
+    markersRef.current.push(centerMarker);
+  };
+
+  return { drawMarkers };
+}
