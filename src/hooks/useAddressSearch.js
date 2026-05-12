@@ -1,10 +1,10 @@
 // hooks/useAddressSearch.js — 주소 검색 + 점수 계산 상태 관리 (단일 책임: 검색 상태)
 import { useState, useCallback } from 'react';
 import { geocodeAddress, searchPlaces, reverseGeocodeRegion } from '../services/kakaoMapService';
-import { loadCctvNear, getCrimesByRegion } from '../services/csvService';
+import { loadCctvNear, getCrimesByRegion, getAvgRegionCrimeTotal } from '../services/csvService';
 import { loadBanksNear } from '../services/bankService';
 import { loadStoresNear } from '../services/storeService';
-import { calcSafetyScore, calcRiskScore, calcConvenienceScore } from '../services/scoreService';
+import { calcSafetyScore, calcInconvenienceScore, calcConvenienceScore } from '../services/scoreService';
 
 const INITIAL_STATE = {
   loading: false,
@@ -25,30 +25,35 @@ export function useAddressSearch() {
 
       // 병렬 로드: CCTV CSV + 카카오 Places + 역지오코딩 + 은행
       const RADIUS_M = 1000;  // 모든 카테고리 통일 반경 (m)
-      const [cctvList, policeList, entertainmentList, convenienceList, hospitalList, bankList, storeList, regionInfo] =
+      const [cctvList, policeList, entertainmentList, convenienceList, hospitalList, bankList, storeList, regionInfo, avgCrimeTotal] =
         await Promise.all([
           loadCctvNear(center, RADIUS_M / 1000),
-          searchPlaces('경찰서', center, RADIUS_M),
+          searchPlaces('경찰서', center, RADIUS_M).then(list =>
+            list.filter(p => p.place_name.includes('경찰서') || p.place_name.includes('파출소') || p.place_name.includes('지구대'))
+          ),
           searchPlaces('유흥업소', center, RADIUS_M),
           searchPlaces('편의점', center, RADIUS_M),
           searchPlaces('병원', center, RADIUS_M),
           loadBanksNear(center, RADIUS_M / 1000),
           loadStoresNear(center, RADIUS_M),
           reverseGeocodeRegion(center.lat, center.lng),
+          getAvgRegionCrimeTotal(),
         ]);
 
       // 시군구 확인 후 범죄통계 로드
       const crimeStats = regionInfo ? await getCrimesByRegion(regionInfo.regionKey) : null;
       const regionKey = regionInfo?.regionKey ?? null;
 
-      const safetyScore = calcSafetyScore({
-        cctv: cctvList.length,
-        police: policeList.length,
-      }, crimeStats);
-      const riskScore = calcRiskScore({ entertainment: entertainmentList.length }, crimeStats);
-      const convenienceScore = calcConvenienceScore({
+      // 현재 지역 범죄 합계 + 전국 평균으로 crimeData 구성
+      const regionCrimeTotal = crimeStats ? crimeStats.reduce((s, r) => s + r.count, 0) : null;
+      const crimeData = { regionTotal: regionCrimeTotal, avgTotal: avgCrimeTotal };
+
+      const safetyResult      = calcSafetyScore({ cctv: cctvList.length, police: policeList.length });
+      const inconvResult      = calcInconvenienceScore({ entertainment: entertainmentList.length }, crimeData);
+      const convenienceResult = calcConvenienceScore({
         convenience: convenienceList.length,
         hospital: hospitalList.length,
+        store: storeList.length,
       });
 
       setState({
@@ -58,9 +63,13 @@ export function useAddressSearch() {
           address,
           center,
           regionKey,
-          safetyScore,
-          riskScore,
-          convenienceScore,
+          safetyScore: safetyResult.score,
+          safetyDetail: safetyResult.detail,
+          inconvenienceScore: inconvResult.score,
+          inconvenienceDetail: inconvResult.detail,
+          convenienceScore: convenienceResult.score,
+          convenienceDetail: convenienceResult.detail,
+          crimeData,
           crimeStats,
           markers: {
             cctv: cctvList,

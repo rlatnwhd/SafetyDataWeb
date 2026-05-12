@@ -11,6 +11,12 @@
   color: var(--color-text);
 }
 
+.year {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
 .noData {
   font-size: 0.85rem;
   color: var(--color-text-muted);
@@ -19,6 +25,114 @@
   border-radius: var(--radius-md);
 }
 
+/* ── 요약 카드 ── */
+.summaryCard {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.summaryRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.summaryKey {
+  font-size: 0.83rem;
+  color: var(--color-text-muted);
+  min-width: 8rem;
+}
+
+.summaryVal {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* 레벨 배지 */
+.levelBadge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+.levelLow     { background: #dcfce7; color: #15803d; }
+.levelMid     { background: #fef9c3; color: #a16207; }
+.levelHigh    { background: #fee2e2; color: #b91c1c; }
+.levelUnknown { background: #f1f5f9; color: #64748b; }
+
+/* 주요 범죄 섹션 */
+.keySection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 0.65rem;
+}
+
+.keyCatRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+}
+
+.keyCatName {
+  font-weight: 600;
+  min-width: 5rem;
+}
+
+.keyCatCount {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  flex: 1;
+}
+
+/* 주의 요소 */
+.warnings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  border-top: 1px solid #fecaca;
+  padding-top: 0.6rem;
+}
+
+.warningTitle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #b91c1c;
+}
+
+.warningChip {
+  font-size: 0.72rem;
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+}
+
+/* 상세보기 버튼 */
+.detailBtn {
+  align-self: flex-start;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding: 0.3rem 0.7rem;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-sm);
+  background: #f9fafb;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.detailBtn:hover { background: #f1f5f9; }
+
+/* ── 상세 표 ── */
 .tableWrap {
   overflow-x: auto;
   border-radius: var(--radius-md);
@@ -85,6 +199,17 @@
   font-weight: 500;
 }
 
+/* 기타 범죄 구분선 */
+.otherHeaderRow { background: #f8fafc; }
+.otherHeader {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  border-top: 2px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
 .totalRow td {
   background: #f1f5f9;
   border-top: 2px solid #d1d5db;
@@ -92,12 +217,5 @@
   font-weight: 700;
 }
 
-.totalLabel {
-  color: var(--color-text);
-}
-
-.totalCount {
-  text-align: right;
-  color: var(--color-primary);
-  font-size: 0.95rem;
-}
+.totalLabel { color: var(--color-text); }
+.totalCount { text-align: right; font-variant-numeric: tabular-nums; }

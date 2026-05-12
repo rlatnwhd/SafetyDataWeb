@@ -147,3 +147,17 @@ export async function getCrimesByRegion(regionKey) {
     count: row.values[colIdx] || 0,
   }));
 }
+
+/**
+ * 전국 모든 시군구의 총 범죄 건수 평균 반환
+ * scoreService에서 현재 지역 범죄율 상대 비교용
+ * @returns {Promise<number|null>}
+ */
+export async function getAvgRegionCrimeTotal() {
+  const data = await loadCrimeData();
+  if (!data.headers.length || !data.rows.length) return null;
+  const totals = data.headers.map((_, i) =>
+    data.rows.reduce((sum, r) => sum + (r.values[i] || 0), 0)
+  );
+  return Math.round(totals.reduce((s, v) => s + v, 0) / totals.length);
+}
