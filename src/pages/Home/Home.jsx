@@ -6,7 +6,7 @@ import ResultSection from '../../components/ResultSection/ResultSection';
 import { useAddressSearch } from '../../hooks/useAddressSearch';
 import styles from './Home.module.css';
 
-export default function Home() {
+export default function Home({ sdkReady }) {
   const { loading, error, result, search, reset } = useAddressSearch();
 
   // 결과가 표시되면 스크롤 이동
@@ -29,7 +29,7 @@ export default function Home() {
           CCTV·가로등·치안시설·유흥업소 데이터를 기반으로<br />
           자취방 주변 안전도와 생활 편의 점수를 분석합니다
         </p>
-        <SearchForm onSearch={search} loading={loading} />
+        <SearchForm onSearch={search} loading={loading} disabled={!sdkReady} />
         <p className={styles.hint}>※ 도로명 또는 지번 주소 모두 입력 가능합니다</p>
       </section>
 
