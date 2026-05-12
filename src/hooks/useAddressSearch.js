@@ -1,6 +1,7 @@
 // hooks/useAddressSearch.js — 주소 검색 + 점수 계산 상태 관리 (단일 책임: 검색 상태)
 import { useState, useCallback } from 'react';
 import { geocodeAddress, searchPlaces } from '../services/kakaoMapService';
+import { loadBusStopsNear, loadCctvNear } from '../services/csvService';
 import { calcSafetyScore, calcRiskScore, calcConvenienceScore } from '../services/scoreService';
 
 const INITIAL_STATE = {
@@ -19,14 +20,15 @@ export function useAddressSearch() {
     try {
       const center = await geocodeAddress(address);
 
-      const [cctvList, policeList, entertainmentList, convenienceList, hospitalList, busStopList] =
+      // CSV 데이터 (CCTV, 버스정류장) + 카카오 Places 병렬 로드
+      const [cctvList, busStopList, policeList, entertainmentList, convenienceList, hospitalList] =
         await Promise.all([
-          searchPlaces('CCTV', center, 500),
+          loadCctvNear(center, 0.5),                    // CSV — CCTV (500m)
+          loadBusStopsNear(center, 0.3),                // CSV — 버스정류장 (300m)
           searchPlaces('경찰서', center, 1000),
           searchPlaces('유흥업소', center, 500),
           searchPlaces('편의점', center, 500),
           searchPlaces('병원', center, 500),
-          searchPlaces('버스정류장', center, 300),
         ]);
 
       const safetyScore = calcSafetyScore({

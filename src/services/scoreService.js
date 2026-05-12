@@ -12,12 +12,13 @@ function countToScore(count, maxCount = 5) {
 
 /**
  * 안전도 점수 계산
+ * CCTV는 CSV 실데이터(500m 반경) 기준 최대 20개 기준
  * @param {{ cctv: number, police: number, streetlight: number }} counts
  */
 export function calcSafetyScore(counts) {
   const w = SCORE_WEIGHTS.safety;
   const total =
-    (countToScore(counts.cctv, 10) * w.cctv +
+    (countToScore(counts.cctv, 20) * w.cctv +
       countToScore(counts.police, 3) * w.police +
       countToScore(counts.streetlight, 15) * w.streetlight) /
     100;
@@ -34,6 +35,7 @@ export function calcRiskScore(counts) {
 
 /**
  * 편의도 점수 계산
+ * 버스정류장은 CSV 실데이터(300m 반경) 기준 최대 8개 기준
  * @param {{ convenience: number, hospital: number, busStop: number }} counts
  */
 export function calcConvenienceScore(counts) {
@@ -41,7 +43,9 @@ export function calcConvenienceScore(counts) {
   const total =
     (countToScore(counts.convenience, 5) * w.convenience +
       countToScore(counts.hospital, 3) * w.hospital +
-      countToScore(counts.busStop, 5) * w.busStop) /
+      countToScore(counts.busStop, 8) * w.busStop) /
     100;
   return Math.round(total);
 }
+
+
