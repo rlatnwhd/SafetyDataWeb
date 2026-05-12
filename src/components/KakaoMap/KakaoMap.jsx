@@ -11,6 +11,7 @@ const TOGGLE_ITEMS = [
   { key: 'convenience',   cat: MARKER_CATEGORIES.CONVENIENCE },
   { key: 'hospital',      cat: MARKER_CATEGORIES.HOSPITAL },
   { key: 'bank',          cat: MARKER_CATEGORIES.BANK },
+  { key: 'store',         cat: MARKER_CATEGORIES.STORE },
 ];
 
 export default function KakaoMap({ center, markers }) {

@@ -60,6 +60,40 @@ export function reverseGeocodeRegion(lat, lng) {
 }
 
 /**
+ * 카테고리 코드로 반경 내 장소 검색 (categorySearch)
+ * 예) MT1=대형마트, BK9=은행, HP8=병원, CS2=편의점
+ * @param {string} categoryCode
+ * @param {{ lat: number, lng: number }} center
+ * @param {number} radius  단위: m
+ * @returns {Promise<Array>}
+ */
+export function searchPlacesByCategory(categoryCode, center, radius = 1000) {
+  return new Promise((resolve, reject) => {
+    if (!window.kakao?.maps?.services) {
+      reject(new Error('카카오맵 SDK가 로드되지 않았습니다.'));
+      return;
+    }
+    const ps = new window.kakao.maps.services.Places();
+    ps.categorySearch(
+      categoryCode,
+      (result, status) => {
+        if (status === window.kakao.maps.services.Status.OK) {
+          resolve(result);
+        } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
+          resolve([]);
+        } else {
+          reject(new Error(`카테고리 검색 오류: ${status}`));
+        }
+      },
+      {
+        location: new window.kakao.maps.LatLng(center.lat, center.lng),
+        radius,
+      }
+    );
+  });
+}
+
+/**
  * @param {string} keyword
  * @param {{ lat: number, lng: number }} center
  * @param {number} radius  단위: m
