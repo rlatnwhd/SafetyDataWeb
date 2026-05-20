@@ -4,9 +4,9 @@ import styles from './Footer.module.css';
 const SOURCES = [
   {
     label: 'CCTV 설치 현황',
-    provider: '공공데이터포털 (data.go.kr)',
+    provider: '행정안전부 (mois.go.kr)',
     note: '공공누리 제1유형 — 출처 표시',
-    url: 'https://www.data.go.kr',
+    url: 'https://www.mois.go.kr',
   },
   {
     label: '범죄 발생 지역별 통계',
