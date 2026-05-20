@@ -70,24 +70,26 @@ export default function ResultSection({ result, error, onClose }) {
           <ScoreBar label="편의도" score={result.convenienceScore} variant="convenience" />
         </div>
 
-        {/* 점수 산정 기준 토글 */}
-        <button
-          className={styles.criteriaBtn}
-          onClick={() => setShowCriteria(v => !v)}
-        >
-          📊 점수 산정 기준 {showCriteria ? '▲' : '▼'}
-        </button>
-        {showCriteria && (
-          <div className={styles.criteriaPanel}>
-            <p className={styles.criteriaMeta}>반경 1km 내 시설 수 기준 · 전국 {result.inconvenienceDetail[1].avg != null ? `평균 범죄 발생 건수 ${result.inconvenienceDetail[1].avg}건` : '평균 비교'}</p>
-            <CriteriaGroup label="안전도" score={result.safetyScore} detail={result.safetyDetail} variant="safety" />
-            <CriteriaGroup label="불편도" score={result.inconvenienceScore} detail={result.inconvenienceDetail} variant="risk" />
-            <CriteriaGroup label="편의도" score={result.convenienceScore} detail={result.convenienceDetail} variant="convenience" />
-          </div>
-        )}
+        <div className={styles.body}>
+          {/* 점수 산정 기준 토글 */}
+          <button
+            className={styles.criteriaBtn}
+            onClick={() => setShowCriteria(v => !v)}
+          >
+            📊 점수 산정 기준 {showCriteria ? '▲' : '▼'}
+          </button>
+          {showCriteria && (
+            <div className={styles.criteriaPanel}>
+              <p className={styles.criteriaMeta}>반경 1km 내 시설 수 기준 · 전국 {result.inconvenienceDetail[1].avg != null ? `평균 범죄 발생 건수 ${result.inconvenienceDetail[1].avg}건` : '평균 비교'}</p>
+              <CriteriaGroup label="안전도" score={result.safetyScore} detail={result.safetyDetail} variant="safety" />
+              <CriteriaGroup label="불편도" score={result.inconvenienceScore} detail={result.inconvenienceDetail} variant="risk" />
+              <CriteriaGroup label="편의도" score={result.convenienceScore} detail={result.convenienceDetail} variant="convenience" />
+            </div>
+          )}
 
-        <KakaoMap center={result.center} markers={result.markers} />
-        <CrimeTable crimeStats={result.crimeStats} regionKey={result.regionKey} crimeData={result.crimeData} />
+          <KakaoMap center={result.center} markers={result.markers} />
+          <CrimeTable crimeStats={result.crimeStats} regionKey={result.regionKey} crimeData={result.crimeData} />
+        </div>
       </div>
     </section>
   );
