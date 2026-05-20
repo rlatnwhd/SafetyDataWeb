@@ -1,6 +1,6 @@
 // hooks/useAddressSearch.js — 주소 검색 + 점수 계산 상태 관리 (단일 책임: 검색 상태)
 import { useState, useCallback } from 'react';
-import { geocodeAddress, searchPlaces, reverseGeocodeRegion } from '../services/kakaoMapService';
+import { geocodeAddress, searchPlaces, searchPlacesByCategory, reverseGeocodeRegion } from '../services/kakaoMapService';
 import { loadCctvNear, getCrimesByRegion, getAvgRegionCrimeTotal, getAvgCrimeByCat } from '../services/csvService';
 import { loadBanksNear } from '../services/bankService';
 import { loadStoresNear } from '../services/storeService';
@@ -33,7 +33,7 @@ export function useAddressSearch() {
           ),
           searchPlaces('유흥업소', center, RADIUS_M),
           searchPlaces('편의점', center, RADIUS_M),
-          searchPlaces('병원', center, RADIUS_M),
+          searchPlacesByCategory('HP8', center, RADIUS_M),
           loadBanksNear(center, RADIUS_M / 1000),
           loadStoresNear(center, RADIUS_M),
           reverseGeocodeRegion(center.lat, center.lng),
