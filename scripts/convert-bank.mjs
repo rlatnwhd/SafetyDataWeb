@@ -11,6 +11,7 @@ const DBF_PATH = path.join(__dirname, '../public/data/전국금융기관(은행)
 const OUT_PATH = path.join(__dirname, '../public/data/banks.json');
 
 const buf = fs.readFileSync(DBF_PATH);
+const decoder = new TextDecoder('euc-kr');
 
 // ── 헤더 파싱 ──────────────────────────────────────────
 const numRecords  = buf.readUInt32LE(4);
@@ -38,7 +39,7 @@ for (let i = 0; i < numRecords; i++) {
     const record = {};
     let fieldOffset = recOffset + 1;
     for (const f of fields) {
-      const raw = buf.slice(fieldOffset, fieldOffset + f.length).toString('latin1').trim();
+      const raw = decoder.decode(buf.slice(fieldOffset, fieldOffset + f.length)).replace(/\0/g, '').trim();
       record[f.name] = raw;
       fieldOffset += f.length;
     }

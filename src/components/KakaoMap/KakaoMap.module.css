@@ -1,82 +1,198 @@
-/* KakaoMap.module.css */
-.wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
+﻿/* KakaoMap.module.css */
+.wrap { display: flex; flex-direction: column; gap: 0.75rem; }
 
-.mapArea {
-  position: relative;
-}
-
+/* 지도 */
+.mapArea { position: relative; }
 .container {
-  width: 100%;
-  height: 360px;
+  width: 100%; height: 360px;
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--color-border);
 }
-
-/* 위치 복귀 버튼 */
 .resetBtn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 36px;
-  height: 36px;
-  background: #ffffff;
-  border-radius: 50%;
+  position: absolute; top: 10px; right: 10px;
+  width: 36px; height: 36px;
+  background: #fff; border-radius: 50%;
   font-size: 1.1rem;
   box-shadow: 0 2px 6px rgba(0,0,0,0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
   transition: transform var(--transition), box-shadow var(--transition);
   z-index: 10;
 }
+.resetBtn:hover { transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.22); }
 
-.resetBtn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.22);
+/* ── 필터 패널 ─────────────────────────────── */
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
-/* 핀 토글 바 */
-.toggleBar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.toggleBtn {
+/* 헤더 */
+.panelHead {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 0.3rem 0.7rem;
-  border-radius: var(--radius-full);
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--color-border-light);
+  background: #f8fafc;
+}
+.panelTitle {
   font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-sub);
+  letter-spacing: 0.02em;
+}
+.headActions { display: flex; align-items: center; gap: 0.25rem; }
+.headBtn {
+  font-size: 0.72rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: opacity var(--transition), background var(--transition);
-  border: 1.5px solid transparent;
+  color: var(--color-primary);
+  padding: 0.15rem 0.35rem;
+  border-radius: var(--radius-xs);
+  transition: background var(--transition);
+}
+.headBtn:hover { background: #eff6ff; }
+.headSep { font-size: 0.72rem; color: #d1d5db; }
+
+/* ── 카테고리 목록 ──────────────────────────── */
+.catRows {
+  display: flex;
+  flex-direction: column;
 }
 
-.on {
-  background: #f0f7ff;
+.catGroup {
+  border-bottom: 1px solid var(--color-border-light);
+}
+.catGroup:last-child { border-bottom: none; }
+
+.catRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  gap: 0.5rem;
+}
+
+/* 왼쪽: 아이콘 + 이름 */
+.catInfo { display: flex; align-items: center; gap: 0.55rem; min-width: 0; }
+
+.catIcon {
+  width: 28px; height: 28px;
+  border-radius: var(--radius-xs);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  transition: background var(--transition), color var(--transition);
+}
+.catName {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  transition: color var(--transition);
+}
+.catNameOff { color: #9ca3af; }
+.badge {
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: #0369a1;
+  background: #e0f2fe;
+  border-radius: 999px;
+  padding: 0.05rem 0.4rem;
+  flex-shrink: 0;
+}
+
+/* 오른쪽: 버튼들 */
+.catControls { display: flex; align-items: center; gap: 0.45rem; flex-shrink: 0; }
+
+/* 상세 버튼 */
+.detailBtn {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding: 0.18rem 0.55rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  background: #f9fafb;
+  white-space: nowrap;
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+.detailBtn:hover { background: #f3f4f6; color: var(--color-text); }
+.detailOpen {
+  background: #eff6ff;
+  color: var(--color-primary);
   border-color: #bfdbfe;
-  color: #1d4ed8;
-  opacity: 1;
 }
 
-.off {
+/* 토글 스위치 */
+.toggle {
+  --tog-color: #9ca3af;
+  position: relative;
+  width: 38px; height: 22px;
+  background: #d1d5db;
+  border-radius: 11px;
+  flex-shrink: 0;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+.toggleOn { background: var(--tog-color, var(--color-primary)); }
+
+.toggleKnob {
+  position: absolute;
+  width: 16px; height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  top: 3px; left: 3px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+}
+.toggleOn .toggleKnob { transform: translateX(16px); }
+
+/* ── 서브카테고리 영역 ──────────────────────── */
+.subArea {
+  padding: 0.55rem 1rem 0.75rem 1rem;
+  background: #f9fafb;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.subChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.chip {
+  --chip-color: #6b7280;
+  --chip-bg: #f3f4f6;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1.5px solid transparent;
+  transition: all 0.15s;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.chipOn {
+  background: var(--chip-bg);
+  border-color: var(--chip-color);
+  color: var(--chip-color);
+}
+.chipOn:hover { filter: brightness(0.94); }
+.chipOff {
   background: #f3f4f6;
-  border-color: #d1d5db;
-  color: #9ca3af;
-  opacity: 0.6;
+  border-color: #e5e7eb;
+  color: #b0b8c1;
+  text-decoration: line-through;
+  text-decoration-color: #d1d5db;
 }
+.chipOff:hover { background: #e9ecef; color: #6b7280; text-decoration: none; }
 
+/* 반응형 */
 @media (max-width: 480px) {
-  .container {
-    height: 240px;
-  }
+  .container { height: 240px; }
+  .catName { font-size: 0.78rem; }
+  .chip { font-size: 0.67rem; }
 }
