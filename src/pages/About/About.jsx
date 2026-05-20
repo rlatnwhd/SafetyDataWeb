@@ -6,7 +6,7 @@ export default function About() {
     <main className={styles.page}>
       <h1 className={styles.title}>서비스 소개</h1>
       <p className={styles.lead}>
-        안전봄은 대학생 자취생을 위해 공공데이터를 기반으로 자취방 주변의 안전도와
+        안전한가봄은 대학생 자취생을 위해 공공데이터를 기반으로 자취방 주변의 안전도와
         생활 편의도를 수치화·시각화해주는 서비스입니다.
       </p>
 

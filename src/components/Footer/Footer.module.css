@@ -1,0 +1,79 @@
+/* Footer.module.css */
+.footer {
+  background: #f1f5f9;
+  border-top: 1px solid var(--color-border);
+  padding: 2rem 1.5rem;
+  margin-top: 4rem;
+}
+
+.inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.heading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.dataLabel {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.sep {
+  color: #cbd5e1;
+}
+
+.provider {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.provider:hover {
+  text-decoration: underline;
+}
+
+.note {
+  color: #94a3b8;
+  font-size: 0.73rem;
+}
+.note::before {
+  content: '(';
+}
+.note::after {
+  content: ')';
+}
+
+.copy {
+  font-size: 0.73rem;
+  color: #94a3b8;
+  margin: 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e2e8f0;
+}

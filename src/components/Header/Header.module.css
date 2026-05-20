@@ -28,7 +28,10 @@
 }
 
 .logoIcon {
-  font-size: 1.3rem;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: var(--color-primary);
 }
 
 .nav {

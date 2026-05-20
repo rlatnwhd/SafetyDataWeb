@@ -2,6 +2,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useKakaoSdk } from './hooks/useKakaoSdk';
 import Header from './components/Header/Header';
+import Footer from './components/Footer/Footer';
 import Home from './pages/Home/Home';
 import About from './pages/About/About';
 import Guide from './pages/Guide/Guide';
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/guide" element={<Guide />} />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }
