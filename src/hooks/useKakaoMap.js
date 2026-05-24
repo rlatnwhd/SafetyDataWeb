@@ -94,6 +94,8 @@ export function useKakaoMap(containerRef, center) {
   const categoryClustersRef = useRef({});  // key → MarkerClusterer
   const centerMarkerRef = useRef(null);
   const logoImagesRef = useRef({});        // brand → MarkerImage (사전 로드)
+  const lastMarkersRef = useRef(null);     // 마지막으로 그린 markers (로고 로드 후 재드로우용)
+  const forceRedrawRef = useRef(null);     // drawMarkers 맰 한번 더 실행하는 함수
 
   // 지도 초기화 + 로고 사전 로드
   useEffect(() => {
@@ -104,12 +106,17 @@ export function useKakaoMap(containerRef, center) {
     });
     // 이미 로드된 경우 재로드 생략
     if (Object.keys(logoImagesRef.current).length === 0) {
-      preloadLogoImages(MARKER_CATEGORIES.STORE.color).then(imgs => { logoImagesRef.current = imgs; });
+      preloadLogoImages(MARKER_CATEGORIES.STORE.color).then(imgs => {
+        logoImagesRef.current = imgs;
+        // 로고 로드 완료 시점에 이미 마커가 그려져 있으면 재드로우
+        forceRedrawRef.current?.();
+      });
     }
   }, [containerRef, center]);
 
   // 마커 그리기 (카테고리별 클러스터)
   const drawMarkers = useCallback((markers) => {
+    lastMarkersRef.current = markers; // 재드로우를 위해 저장
     // 기존 클러스터·마커 전체 제거
     Object.values(categoryClustersRef.current).forEach(cl => cl.clear());
     Object.values(categoryMarkersRef.current).flat().forEach(m => m.setMap(null));
@@ -176,6 +183,13 @@ export function useKakaoMap(containerRef, center) {
       map: mapRef.current,
     });
   }, [center]);
+
+  // forceRedrawRef 를 drawMarkers와 동기화 (신규 center가 올 때마다 갱신)
+  useEffect(() => {
+    forceRedrawRef.current = () => {
+      if (lastMarkersRef.current) drawMarkers(lastMarkersRef.current);
+    };
+  }, [drawMarkers]);
 
   // 카테고리 토글
   const toggleCategory = useCallback((key, visible) => {
