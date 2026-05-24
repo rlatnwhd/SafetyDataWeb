@@ -1,6 +1,79 @@
-// hooks/useKakaoMap.js — 카카오맵 DOM 인스턴스 관리 (MarkerClusterer 적용)
+// hooks/useKakaoMap.js — 카카오맵 DOM 인스턴스 관리 (MarkerClusterer + 마트 로고 마커)
 import { useEffect, useRef, useCallback } from 'react';
 import { MARKER_CATEGORIES, MAP_DEFAULT } from '../constants/mapConfig';
+
+/* ─── 마트 로고 ──────────────────────────────────────────── */
+const STORE_LOGO_URLS = {
+  emart:    '/MTLogo/Emart.png',
+  lotte:    '/MTLogo/Lottemart.png',
+  homeplus: '/MTLogo/Homeplus.png',
+  costco:   '/MTLogo/Costco.png',
+  traders:  '/MTLogo/TradersWholesaleClub.png',
+  mega:     '/MTLogo/Megamart.png',
+  hanaro:   '/MTLogo/Hanaromart.png',
+  nobrand:  '/MTLogo/Nobrand.png',
+};
+
+/** 장소명 → 브랜드 키 */
+function getStoreBrand(name = '') {
+  if (/^이마트(?!24)/.test(name)) return 'emart';
+  if (/롯데마트/.test(name))      return 'lotte';
+  if (/홈플러스/.test(name))      return 'homeplus';
+  if (/코스트코/.test(name))      return 'costco';
+  if (/트레이더스/.test(name))     return 'traders';
+  if (/메가마트/.test(name))      return 'mega';
+  if (/하나로마트/.test(name))     return 'hanaro';
+  if (/노브랜드/.test(name))      return 'nobrand';
+  return null;
+}
+
+/**
+ * 로고 PNG를 fetch → base64 인라인 SVG로 원형 마커 이미지 생성
+ * (화질 깨짐 없음, 기존 이모지 마커와 동일 모양/크기)
+ */
+async function makeLogoMarkerImage(logoUrl, color) {
+  let base64;
+  try {
+    const res  = await fetch(logoUrl);
+    const blob = await res.blob();
+    base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+
+  // 기존 이모지 마커와 동일: 32×32, circle r=14
+  const SIZE = 32, CX = 16, CY = 16, R = 14;
+  const svg = [
+    `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${SIZE}" height="${SIZE}">`,
+    `<defs><clipPath id="lc"><circle cx="${CX}" cy="${CY}" r="${R - 1}"/></clipPath></defs>`,
+    `<circle cx="${CX}" cy="${CY}" r="${R}" fill="white" stroke="${color}" stroke-width="2.5"/>`,
+    `<image href="${base64}" x="4" y="4" width="24" height="24" preserveAspectRatio="xMidYMid meet" clip-path="url(#lc)"/>`,
+    `</svg>`,
+  ].join('');
+
+  const url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  return new window.kakao.maps.MarkerImage(
+    url,
+    new window.kakao.maps.Size(SIZE, SIZE),
+    { offset: new window.kakao.maps.Point(CX, CY) }
+  );
+}
+
+/** 모든 마트 로고 사전 로드 → { emart: MarkerImage, … } */
+async function preloadLogoImages(color) {
+  const pairs = await Promise.all(
+    Object.entries(STORE_LOGO_URLS).map(async ([brand, url]) => {
+      const img = await makeLogoMarkerImage(url, color);
+      return [brand, img];
+    })
+  );
+  return Object.fromEntries(pairs.filter(([, v]) => v !== null));
+}
 
 /** SVG 이모지 마커 이미지 생성 */
 function makeMarkerImage(emoji, color) {
@@ -20,14 +93,19 @@ export function useKakaoMap(containerRef, center) {
   const categoryMarkersRef = useRef({});   // key → Marker[]
   const categoryClustersRef = useRef({});  // key → MarkerClusterer
   const centerMarkerRef = useRef(null);
+  const logoImagesRef = useRef({});        // brand → MarkerImage (사전 로드)
 
-  // 지도 초기화
+  // 지도 초기화 + 로고 사전 로드
   useEffect(() => {
     if (!containerRef.current || !center || !window.kakao?.maps) return;
     mapRef.current = new window.kakao.maps.Map(containerRef.current, {
       center: new window.kakao.maps.LatLng(center.lat, center.lng),
       level: MAP_DEFAULT.level,
     });
+    // 이미 로드된 경우 재로드 생략
+    if (Object.keys(logoImagesRef.current).length === 0) {
+      preloadLogoImages(MARKER_CATEGORIES.STORE.color).then(imgs => { logoImagesRef.current = imgs; });
+    }
   }, [containerRef, center]);
 
   // 마커 그리기 (카테고리별 클러스터)
@@ -52,13 +130,21 @@ export function useKakaoMap(containerRef, center) {
     ];
 
     entries.forEach(({ key, list, cat }) => {
-      const image = makeMarkerImage(cat.emoji, cat.color);
-      const markerList = list.map(place =>
-        new window.kakao.maps.Marker({
+      const defaultImage = makeMarkerImage(cat.emoji, cat.color);
+      const markerList = list.map(place => {
+        let image = defaultImage;
+        // 마트 마커: 브랜드별 로고 이미지 사용
+        if (key === 'store') {
+          const brand = getStoreBrand(place.place_name || '');
+          if (brand && logoImagesRef.current[brand]) {
+            image = logoImagesRef.current[brand];
+          }
+        }
+        return new window.kakao.maps.Marker({
           position: new window.kakao.maps.LatLng(place.y, place.x),
           image,
-        })
-      );
+        });
+      });
       categoryMarkersRef.current[key] = markerList;
 
       const clusterer = new window.kakao.maps.MarkerClusterer({
