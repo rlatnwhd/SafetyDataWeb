@@ -1,4 +1,4 @@
-// hooks/useKakaoMap.js — 카카오맵 DOM 인스턴스 관리 (MarkerClusterer + 마트 로고 마커)
+// hooks/useKakaoMap.js — 카카오맵 DOM 인스턴스 관리 (MarkerClusterer + 마트/편의점 로고 마커)
 import { useEffect, useRef, useCallback } from 'react';
 import { MARKER_CATEGORIES, MAP_DEFAULT } from '../constants/mapConfig';
 
@@ -14,16 +14,35 @@ const STORE_LOGO_URLS = {
   nobrand:  '/MTLogo/Nobrand.png',
 };
 
-/** 장소명 → 브랜드 키 */
+/* ─── 편의점 로고 ────────────────────────────────────────── */
+const CVS_LOGO_URLS = {
+  gs25:     '/CvsLogo/GS25.png',
+  cu:       '/CvsLogo/CU.png',
+  emart24:  '/CvsLogo/EMART24.png',
+  seven:    '/CvsLogo/7-ELEVEN.png',
+  ministop: '/CvsLogo/MINISTOP.png',
+};
+
+/** 마트 장소명 → 브랜드 키 */
 function getStoreBrand(name = '') {
-  if (/^이마트(?!24)/.test(name)) return 'emart';
-  if (/롯데마트/.test(name))      return 'lotte';
-  if (/홈플러스/.test(name))      return 'homeplus';
-  if (/코스트코/.test(name))      return 'costco';
-  if (/트레이더스/.test(name))     return 'traders';
-  if (/메가마트/.test(name))      return 'mega';
-  if (/하나로마트/.test(name))     return 'hanaro';
-  if (/노브랜드/.test(name))      return 'nobrand';
+  if (/^이마트(?!24)/.test(name)) return 'store_emart';
+  if (/롯데마트/.test(name))      return 'store_lotte';
+  if (/홈플러스/.test(name))      return 'store_homeplus';
+  if (/코스트코/.test(name))      return 'store_costco';
+  if (/트레이더스/.test(name))     return 'store_traders';
+  if (/메가마트/.test(name))      return 'store_mega';
+  if (/하나로마트/.test(name))     return 'store_hanaro';
+  if (/노브랜드/.test(name))      return 'store_nobrand';
+  return null;
+}
+
+/** 편의점 장소명 → 브랜드 키 */
+function getCvsBrand(name = '') {
+  if (/^GS25/.test(name))       return 'cvs_gs25';
+  if (/^CU/.test(name))         return 'cvs_cu';
+  if (/^이마트24/.test(name))   return 'cvs_emart24';
+  if (/^세븐일레븐/.test(name)) return 'cvs_seven';
+  if (/^미니스톱/.test(name))   return 'cvs_ministop';
   return null;
 }
 
@@ -64,12 +83,20 @@ async function makeLogoMarkerImage(logoUrl, color) {
   );
 }
 
-/** 모든 마트 로고 사전 로드 → { emart: MarkerImage, … } */
-async function preloadLogoImages(color) {
+/** 마트 + 편의점 로고 전체 사전 로드 */
+async function preloadAllLogos() {
+  const targets = [
+    ...Object.entries(STORE_LOGO_URLS).map(([k, url]) => ({
+      key: `store_${k}`, url, color: MARKER_CATEGORIES.STORE.color,
+    })),
+    ...Object.entries(CVS_LOGO_URLS).map(([k, url]) => ({
+      key: `cvs_${k}`, url, color: MARKER_CATEGORIES.CONVENIENCE.color,
+    })),
+  ];
   const pairs = await Promise.all(
-    Object.entries(STORE_LOGO_URLS).map(async ([brand, url]) => {
+    targets.map(async ({ key, url, color }) => {
       const img = await makeLogoMarkerImage(url, color);
-      return [brand, img];
+      return [key, img];
     })
   );
   return Object.fromEntries(pairs.filter(([, v]) => v !== null));
@@ -106,7 +133,7 @@ export function useKakaoMap(containerRef, center) {
     });
     // 이미 로드된 경우 재로드 생략
     if (Object.keys(logoImagesRef.current).length === 0) {
-      preloadLogoImages(MARKER_CATEGORIES.STORE.color).then(imgs => {
+      preloadAllLogos().then(imgs => {
         logoImagesRef.current = imgs;
         // 로고 로드 완료 시점에 이미 마커가 그려져 있으면 재드로우
         forceRedrawRef.current?.();
@@ -143,6 +170,13 @@ export function useKakaoMap(containerRef, center) {
         // 마트 마커: 브랜드별 로고 이미지 사용
         if (key === 'store') {
           const brand = getStoreBrand(place.place_name || '');
+          if (brand && logoImagesRef.current[brand]) {
+            image = logoImagesRef.current[brand];
+          }
+        }
+        // 편의점 마커: 브랜드별 로고 이미지 사용
+        if (key === 'convenience') {
+          const brand = getCvsBrand(place.place_name || '');
           if (brand && logoImagesRef.current[brand]) {
             image = logoImagesRef.current[brand];
           }
