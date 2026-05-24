@@ -184,11 +184,7 @@ export default function KakaoMap({ center, markers }) {
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.mapArea}>
-        <div ref={containerRef} className={styles.container} />
-        <button className={styles.resetBtn} onClick={resetCenter} title="검색 위치로 돌아가기">📍</button>
-      </div>
-
+      {/* 필터 패널 — 왼쪽 */}
       <div className={styles.panel}>
         {/* 패널 헤더 */}
         <div className={styles.panelHead}>
@@ -267,6 +263,12 @@ export default function KakaoMap({ center, markers }) {
             );
           })}
         </div>
+      </div>
+
+      {/* 지도 영역 — 오른쪽 */}
+      <div className={styles.mapArea}>
+        <div ref={containerRef} className={styles.container} />
+        <button className={styles.resetBtn} onClick={resetCenter} title="검색 위치로 돌아가기">📍</button>
       </div>
     </div>
   );

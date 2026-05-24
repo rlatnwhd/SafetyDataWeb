@@ -123,14 +123,30 @@ export function useKakaoMap(containerRef, center) {
   const logoImagesRef = useRef({});        // brand → MarkerImage (사전 로드)
   const lastMarkersRef = useRef(null);     // 마지막으로 그린 markers (로고 로드 후 재드로우용)
   const forceRedrawRef = useRef(null);     // drawMarkers 맰 한번 더 실행하는 함수
+  const radiusCircleRef = useRef(null);    // 반경 표시 원
 
-  // 지도 초기화 + 로고 사전 로드
+  // 지도 초기화 + 반경 원 + 로고 사전 로드
   useEffect(() => {
     if (!containerRef.current || !center || !window.kakao?.maps) return;
     mapRef.current = new window.kakao.maps.Map(containerRef.current, {
       center: new window.kakao.maps.LatLng(center.lat, center.lng),
       level: MAP_DEFAULT.level,
     });
+
+    // 기존 반경 원 제거 후 재그리기
+    if (radiusCircleRef.current) radiusCircleRef.current.setMap(null);
+    radiusCircleRef.current = new window.kakao.maps.Circle({
+      center: new window.kakao.maps.LatLng(center.lat, center.lng),
+      radius: 1000,
+      strokeWeight: 1.5,
+      strokeColor: '#2563eb',
+      strokeOpacity: 0.35,
+      strokeStyle: 'solid',
+      fillColor: '#3b82f6',
+      fillOpacity: 0.05,
+      map: mapRef.current,
+    });
+
     // 이미 로드된 경우 재로드 생략
     if (Object.keys(logoImagesRef.current).length === 0) {
       preloadAllLogos().then(imgs => {
