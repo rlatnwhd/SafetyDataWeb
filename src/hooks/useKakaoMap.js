@@ -1,6 +1,9 @@
-// hooks/useKakaoMap.js — 카카오맵 DOM 인스턴스 관리 (MarkerClusterer + 마트/편의점 로고 마커)
+// hooks/useKakaoMap.js — 카카오맵 DOM 인스턴스 관리 (MarkerClusterer + 마트/편의점/은행 로고 마커)
 import { useEffect, useRef, useCallback } from 'react';
 import { MARKER_CATEGORIES, MAP_DEFAULT } from '../constants/mapConfig';
+
+/* ─── 한글 파일명 URL 인코딩 헬퍼 ────────────────────── */
+const bk = name => `/BankLogo/${encodeURIComponent(name)}`;
 
 /* ─── 마트 로고 ──────────────────────────────────────────── */
 const STORE_LOGO_URLS = {
@@ -23,6 +26,27 @@ const CVS_LOGO_URLS = {
   ministop: '/CvsLogo/MINISTOP.png',
 };
 
+/* ─── 은행 로고 (한글 파일명 → encodeURIComponent 적용) ─────────── */
+const BANK_LOGO_URLS = {
+  kb:      bk('국민은행.png'),
+  shinhan: bk('신한은행.png'),
+  woori:   bk('우리은행.png'),
+  hana:    bk('하나은행.png'),
+  nh:      bk('농협은행.png'),
+  ibk:     bk('기업은행.png'),
+  sc:      bk('제일은행.png'),
+  sh:      bk('수협은행.png'),
+  kdb:     bk('한국산업은행.png'),
+  exim:    bk('한국수출입은행.png'),
+  citi:    bk('한국씨티은행.png'),
+  bnk_bs:  bk('부산은행.png'),
+  bnk_gn:  bk('경남은행.png'),
+  im:      bk('iM뱅크.png'),
+  gwangju: bk('광주은행.png'),
+  jb:      bk('전북은행.png'),
+  jeju:    bk('제주은행.png'),
+};
+
 /** 마트 장소명 → 브랜드 키 */
 function getStoreBrand(name = '') {
   if (/^이마트(?!24)/.test(name)) return 'store_emart';
@@ -43,6 +67,29 @@ function getCvsBrand(name = '') {
   if (/^이마트24/.test(name))   return 'cvs_emart24';
   if (/^세븐일레븐/.test(name)) return 'cvs_seven';
   if (/^미니스톱/.test(name))   return 'cvs_ministop';
+  return null;
+}
+
+/** 은행 장소 객체 (place.bank || place.place_name) → 브랜드 키 */
+function getBankBrand(place) {
+  const name = place.bank || place.place_name || '';
+  if (name === 'KB국민은행')           return 'bank_kb';
+  if (name === '신한은행')              return 'bank_shinhan';
+  if (name === '우리은행')              return 'bank_woori';
+  if (name === '하나은행')              return 'bank_hana';
+  if (name === 'NH농협은행')           return 'bank_nh';
+  if (name === 'IBK기업은행')          return 'bank_ibk';
+  if (name === 'SC제일은행')           return 'bank_sc';
+  if (name === 'Sh수협은행')           return 'bank_sh';
+  if (name === '한국산업은행')         return 'bank_kdb';
+  if (name === '수출입은행')           return 'bank_exim';
+  if (name === '한국씨티은행')         return 'bank_citi';
+  if (name === 'BNK부산은행')          return 'bank_bnk_bs';
+  if (name === 'BNK경남은행')          return 'bank_bnk_gn';
+  if (name === 'iM뱅크(구 대구은행)')  return 'bank_im';
+  if (name === '광주은행')              return 'bank_gwangju';
+  if (name === '전북은행')              return 'bank_jb';
+  if (name === '제주은행')              return 'bank_jeju';
   return null;
 }
 
@@ -83,7 +130,7 @@ async function makeLogoMarkerImage(logoUrl, color) {
   );
 }
 
-/** 마트 + 편의점 로고 전체 사전 로드 */
+/** 마트 + 편의점 + 은행 로고 전체 사전 로드 */
 async function preloadAllLogos() {
   const targets = [
     ...Object.entries(STORE_LOGO_URLS).map(([k, url]) => ({
@@ -91,6 +138,9 @@ async function preloadAllLogos() {
     })),
     ...Object.entries(CVS_LOGO_URLS).map(([k, url]) => ({
       key: `cvs_${k}`, url, color: MARKER_CATEGORIES.CONVENIENCE.color,
+    })),
+    ...Object.entries(BANK_LOGO_URLS).map(([k, url]) => ({
+      key: `bank_${k}`, url, color: MARKER_CATEGORIES.BANK.color,
     })),
   ];
   const pairs = await Promise.all(
@@ -193,6 +243,13 @@ export function useKakaoMap(containerRef, center) {
         // 편의점 마커: 브랜드별 로고 이미지 사용
         if (key === 'convenience') {
           const brand = getCvsBrand(place.place_name || '');
+          if (brand && logoImagesRef.current[brand]) {
+            image = logoImagesRef.current[brand];
+          }
+        }
+        // 은행 마커: 은행명별 로고 이미지 사용
+        if (key === 'bank') {
+          const brand = getBankBrand(place);
           if (brand && logoImagesRef.current[brand]) {
             image = logoImagesRef.current[brand];
           }
