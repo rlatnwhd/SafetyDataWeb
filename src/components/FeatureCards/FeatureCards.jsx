@@ -6,19 +6,19 @@ const FEATURES = [
     icon: '📷',
     variant: 'safety',
     title: '안전도 분석',
-    desc: 'CCTV·가로등·경찰서 위치 기반 안전 점수 산출',
+    desc: '반경 1km 내 CCTV·경찰서 수를 전국 평균과 비교한 안전 점수',
   },
   {
     icon: '📍',
     variant: 'risk',
     title: '위험 요소 시각화',
-    desc: '유흥업소·치안 취약 구역 지도 표시',
+    desc: '유흘업소 밀집도·지역 범죄 발생 건수 기반 불편도 점수',
   },
   {
     icon: '🏪',
     variant: 'convenience',
     title: '편의시설 분석',
-    desc: '편의점·병원·버스정류장 거리 기반 점수',
+    desc: '반경 1km 내 편의점·병원·대형마트 수를 전국 평균과 비교한 편의도 점수',
   },
 ];
 
