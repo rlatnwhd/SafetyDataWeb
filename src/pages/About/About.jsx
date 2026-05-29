@@ -15,7 +15,7 @@ export default function About() {
         <ul className={styles.list}>
           <li className={styles.listItem}>자취방 계약 전 주변 치안 상태를 파악하기 어려움</li>
           <li className={styles.listItem}>유흥업소 밀집 지역 여부를 직관적으로 알 수 없음</li>
-          <li className={styles.listItem}>편의점·병원·버스정류장까지의 거리 정보 부재</li>
+          <li className={styles.listItem}>생활 편의시설(편의점·병원·마트) 분포 정보 부재</li>
         </ul>
       </div>
 
@@ -23,13 +23,16 @@ export default function About() {
         <h2 className={styles.sectionTitle}>주요 기능</h2>
         <ul className={styles.list}>
           <li className={styles.listItem}>
-            <strong>안전도 분석</strong> — CCTV·가로등·경찰서 위치 데이터 기반 안전 점수 산출
+            <strong>안전도 분석</strong> — 반경 1km 내 CCTV·경찰서 수를 전국 평균과 비교한 안전 점수
           </li>
           <li className={styles.listItem}>
-            <strong>위험 요소 시각화</strong> — 유흥업소·치안 취약 구역 지도 마커 표시
+            <strong>불편도 분석</strong> — 유흥업소 밀집도·지역 범죄 발생 건수 기반 불편도 점수
           </li>
           <li className={styles.listItem}>
-            <strong>편의시설 분석</strong> — 편의점·병원·버스정류장 거리 기반 편의 점수
+            <strong>편의시설 분석</strong> — 반경 1km 내 편의점·병원·대형마트 수를 전국 평균과 비교한 편의도 점수
+          </li>
+          <li className={styles.listItem}>
+            <strong>지도 시각화</strong> — 주변 시설 마커(브랜드 로고 포함) 및 반경 1km 원 표시
           </li>
         </ul>
       </div>
@@ -37,9 +40,10 @@ export default function About() {
       <div className={styles.section}>
         <h2 className={styles.sectionTitle}>사용 데이터</h2>
         <ul className={styles.list}>
-          <li className={styles.listItem}>카카오맵 API (장소 검색, 지도 시각화)</li>
-          <li className={styles.listItem}>공공데이터포털 CCTV 위치 정보</li>
-          <li className={styles.listItem}>경찰청 치안 시설 현황 데이터</li>
+          <li className={styles.listItem}>카카오맵 API (주소 검색, 장소 카테고리 검색, 지도 시각화)</li>
+          <li className={styles.listItem}>공공데이터포털 — 전국 CCTV 설치 현황</li>
+          <li className={styles.listItem}>경찰청 — 범죄 발생 지역별 통계 (CSV)</li>
+          <li className={styles.listItem}>금융감독원 — 전국 금융기관(은행) 점포 정보 (DBF)</li>
         </ul>
       </div>
     </main>

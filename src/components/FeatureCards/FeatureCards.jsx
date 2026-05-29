@@ -12,7 +12,7 @@ const FEATURES = [
     icon: '📍',
     variant: 'risk',
     title: '위험 요소 시각화',
-    desc: '유흘업소 밀집도·지역 범죄 발생 건수 기반 불편도 점수',
+    desc: '유흥업소 밀집도·지역 범죄 발생 건수 기반 불편도 점수',
   },
   {
     icon: '🏪',
